@@ -9,25 +9,26 @@ namespace MohawkGame2D
     public class Player
     {
         public Vector2 position = new Vector2(300, 700);
-        Vector2 velocity = new Vector2(0,0);
+        public Vector2 velocity = new Vector2(0,0);
         Vector2 acceleration = new Vector2(0, 0);
-        float size = 40;
+        public float size = 40;
+        public bool createBall = false;
 
         public Player()
         {
 
         }
 
-        public void Update()
+        public void Update(Ball ball)
         {
-            PInput();
+            PInput(ball);
             Motion();
             Colision();
             Render();
         }
 
         //processes the player's input
-        void PInput() {
+        void PInput(Ball ball) {
             acceleration = new Vector2(0, 0);
 
             //player movement with arrow keys based on acceleration
@@ -37,7 +38,8 @@ namespace MohawkGame2D
             if (Input.IsKeyboardKeyDown(KeyboardKey.Down)) acceleration.Y = 1;
             if (acceleration.Length() != 0) acceleration = Vector2.Normalize(acceleration) * 100;
 
-
+            //shoot ball when spacebar pressed; only if the ball doesn't exist
+            if (Input.IsKeyboardKeyPressed(KeyboardKey.Space) && ball == null) createBall = true;
         }
 
         //calculates the motion and updates the position
@@ -48,6 +50,7 @@ namespace MohawkGame2D
 
         //handles wall colisions
         void Colision() {
+            if (velocity.Length() == 0) return; //safety
             Vector2 direction = Vector2.Normalize(velocity);
             float dampening = 0.5f;
             if (position.X + size > Window.Width) { //right wall
@@ -57,7 +60,9 @@ namespace MohawkGame2D
                 float distanceSnap = distancePast / Vector2.Dot(direction, perpindicular);
                 position -= direction * MathF.Abs(distanceSnap);
                 //refect
-                velocity.X *= -1 * dampening;
+                velocity.X *= -1;
+                //reduce speed
+                velocity *= dampening;
             }
             if (position.X - size < 0) { //left wall
                 //snap
@@ -66,7 +71,9 @@ namespace MohawkGame2D
                 float distanceSnap = distancePast / Vector2.Dot(direction, perpindicular);
                 position -= direction * MathF.Abs(distanceSnap);
                 //refect
-                velocity.X *= -1 * dampening;
+                velocity.X *= -1;
+                //reduce speed
+                velocity *= dampening;
             }
             if (position.Y + size > Window.Height) { //bottom wall
                 //snap
@@ -75,7 +82,9 @@ namespace MohawkGame2D
                 float distanceSnap = distancePast / Vector2.Dot(direction, perpindicular);
                 position -= direction * MathF.Abs(distanceSnap);
                 //refect
-                velocity.Y *= -1 * dampening;
+                velocity.Y *= -1;
+                //reduce speed
+                velocity *= dampening;
             }
             if (position.Y - size < 0) { //top wall
                 //snap
@@ -84,7 +93,9 @@ namespace MohawkGame2D
                 float distanceSnap = distancePast / Vector2.Dot(direction, perpindicular);
                 position -= direction * MathF.Abs(distanceSnap);
                 //refect
-                velocity.Y *= -1 * dampening;
+                velocity.Y *= -1;
+                //reduce speed
+                velocity *= dampening;
             }
         }
 
@@ -96,7 +107,7 @@ namespace MohawkGame2D
             Vector2 P3Direction;
             Vector2 P4Direction;
             if (velocity.Length() != 0) direction = Vector2.Normalize(velocity);
-            else direction = -Vector2.UnitY;
+            else direction = -Vector2.UnitY; //safety
 
             float angle = 130 * MathF.PI / 180; //in degrees
 

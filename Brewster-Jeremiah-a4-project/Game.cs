@@ -9,6 +9,7 @@ namespace MohawkGame2D
     {
         Color background = new Color(0, 0, 40);
         Player player;
+        Ball ball;
 
         public void Setup()
         {
@@ -22,7 +23,16 @@ namespace MohawkGame2D
         {
             Window.ClearBackground(background);
 
-            player.Update();
+            if (ball != null) {
+                ball.Update();
+                if (ball.destroy) ball = null;
+            }
+
+            player.Update(ball);
+            if (player.createBall) {
+                ball = new Ball(player.position, player.size, player.velocity);
+                player.createBall = false;
+            }
         }
     }
 
