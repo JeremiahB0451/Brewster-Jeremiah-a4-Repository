@@ -10,6 +10,9 @@ namespace MohawkGame2D
         Color background = new Color(0, 0, 40);
         Player player;
         Ball ball;
+        Enemy[] enemies = new Enemy[100];
+        float spawnTimer = 3;
+        int score = 0;
 
         public void Setup()
         {
@@ -23,6 +26,25 @@ namespace MohawkGame2D
         {
             Window.ClearBackground(background);
 
+            //spawn enemies
+            spawnTimer -= Time.DeltaTime;
+            //try to spawn an enemy when the timer hits 0
+            //only reset timer if successful so that it can try again next frame
+            if (spawnTimer <= 0) if (SpawnEnemy()) ResetTimer();
+
+            //update all objects (in draw order)
+
+            for (int i = 0; i < enemies.Length; i++) {
+                if (enemies[i] == null) continue;
+                enemies[i].Update(player, ball);
+                if (enemies[i].destroy) { //ball hit the enemy
+                    score += enemies[i].addScore;
+                    ////create explosion
+                    enemies[i] = null;
+                    continue;
+                }
+            }
+            
             if (ball != null) {
                 ball.Update();
                 if (ball.destroy) ball = null;
@@ -32,6 +54,49 @@ namespace MohawkGame2D
             if (player.createBall) {
                 ball = new Ball(player.position, player.size, player.velocity);
                 player.createBall = false;
+            }
+        }
+
+        //creates a new enemy above the screen
+        bool SpawnEnemy() {
+            bool successful = false;
+            //create an enemy at the first avalable position in enemies
+            for (int i = 0; i < enemies.Length; i++) {
+                if (enemies[i] != null) continue;
+                enemies[i] = new Enemy();
+                successful = true;
+                //move it to a random x position within the screen at y = -100
+                enemies[i].position = new Vector2(Random.Float(Window.Width - enemies[i].hitboxSize.X), -100);
+                //delete the enemy if it's colliding with any other enemies
+                for (int j = 0; j < enemies.Length; j++) {
+                    if (enemies[j] == null || j == i) continue;
+                    if (MathF.Abs(enemies[i].position.X - enemies[j].position.X) < enemies[i].hitboxSize.X &&
+                        MathF.Abs(enemies[i].position.Y - enemies[j].position.Y) < enemies[i].hitboxSize.Y) {
+                        enemies[i] = null;
+                        successful = false;
+                        break;
+                    } else if (MathF.Abs(enemies[i].position.Y - enemies[j].position.Y) < 5) { //align them vertically if they are less than 5 px apart
+                        enemies[i].position.Y = enemies[j].position.Y;
+                    }
+                }
+                break;
+            }
+            return successful;
+        }
+
+        //resets the enemy spawn timer complexly
+        void ResetTimer() {
+            //roll a value to determine the bracket
+            float roll = Random.Float();
+            if (roll > 0.8f) { //20% chance
+                spawnTimer = Random.Float(5, 7);
+            } else if (roll > 0.4f) { //40% chance
+                spawnTimer = Random.Float(2, 5);
+            } else if (roll > 0.15f) { //25% chance
+                spawnTimer = Random.Float(0.5f, 2);
+            } else { //15% chance
+                //double spawn
+                spawnTimer = 0;
             }
         }
     }
