@@ -11,16 +11,17 @@ namespace MohawkGame2D
         Vector2 velocity;
         public float size = 15;
         int wallsHit = 0;
-        int wallLimit = 2;
+        int wallLimit = 3;
         int upgradeAt = 1;
         bool upgraded = false;
         public int enemiesHit = 0;
         int enenmyLimit = 1;
-        int enemyLimitUpgrade = 3;
+        int enemyLimitUpgrade = 5;
         public bool destroy = false;
         Vector2[] trailPositions;
         float[] trailSizes;
         int trailLength = 40;
+        Sound bounce;
 
         //colours
         Color ballColor;
@@ -47,6 +48,9 @@ namespace MohawkGame2D
             //initilize colours
             ballColor = baseColor;
             trailColor = new Color(baseColor.R, baseColor.G, baseColor.B, 128);
+
+            bounce = Audio.LoadSound("Assets/WallBounce.wav");
+            Audio.SetVolume(bounce, 0.5f);
         }
 
         public void Update()
@@ -75,6 +79,7 @@ namespace MohawkGame2D
                 //refect
                 velocity.X *= -1;
                 wallsHit++;
+                Audio.Play(bounce);
             }
             if (position.X - size < 0) { //left wall
                 //snap
@@ -85,6 +90,7 @@ namespace MohawkGame2D
                 //refect
                 velocity.X *= -1;
                 wallsHit++;
+                Audio.Play(bounce);
             }
             if (position.Y + size > Window.Height) { //bottom wall
                 //snap
@@ -95,6 +101,7 @@ namespace MohawkGame2D
                 //refect
                 velocity.Y *= -1;
                 wallsHit++;
+                Audio.Play(bounce);
             }
             if (position.Y - size < 0) { //top wall
                 //snap
@@ -105,6 +112,7 @@ namespace MohawkGame2D
                 //refect
                 velocity.Y *= -1;
                 wallsHit++;
+                Audio.Play(bounce);
             }
         }
 
@@ -113,12 +121,14 @@ namespace MohawkGame2D
         {
             //destroy ball if it has hit too many walls
             if (wallsHit >= wallLimit) {
+                Audio.Stop(bounce);
                 destroy = true;
                 return;
             }
             //'upgrade' ball after it hits enough walls
             if (wallsHit >= upgradeAt && !upgraded) {
                 enenmyLimit = enemyLimitUpgrade;
+                velocity *= 1.5f;
                 ballColor = upgradedColor;
                 targetColor = Random.Color();
                 upgraded = true;
