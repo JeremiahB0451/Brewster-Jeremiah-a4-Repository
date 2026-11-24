@@ -12,8 +12,22 @@ namespace MohawkGame2D
         Ball ball;
         Enemy[] enemies = new Enemy[100];
         Explosion[] explosions = new Explosion[10];
+        Star[] stars = new Star[25];
+        Explosion playerExplosion;
         float spawnTimer = 3;
+
+        //chances for different spawn timings
+        static float[] startSpawnRates = [0.4f, 0.2f, 0.03f];
+        static float[] spawnRates1 = [0.8f, 0.4f, 0.15f];
+        static float[] spawnRates2 = [0.95f, 0.85f, 0.25f];
+        float[] curentSpawnRates;
+        //when to swap to different rates
+        float[] spawnChangeTimes = [10, 25, 30, 45, 55, 65, 80, 100];
+        int spawnChangeTimesIndex = 0;
+        float timePlaying = 0;
         int score = 0;
+        int highScore = 0;
+        bool playing = true;
         Font mainFont;
         public void Setup()
         {
@@ -22,6 +36,13 @@ namespace MohawkGame2D
 
             player = new Player();
 
+            curentSpawnRates = startSpawnRates;
+
+            //create initial star layout
+            for (int i = 0; i < stars.Length; i++) {
+                stars[i] = new Star(Random.Vector2(Window.Width, Window.Height), true);
+            }
+
             //asset loading
             mainFont = Text.LoadFont("Assets/OCRAEXT.TTF", 200);
         }
@@ -29,6 +50,63 @@ namespace MohawkGame2D
         public void Update()
         {
             Window.ClearBackground(background);
+
+            //draw stars in both states
+            for (int i = 0; i < stars.Length; i++) {
+                stars[i].Update();
+                if (stars[i].position.Y > Window.Height + 10) stars[i] = new Star(new Vector2(0,0), false);
+            } 
+
+            if (playerExplosion != null) { //ensures the player explosion despawns
+                playerExplosion.Update();
+                if (playerExplosion.existTime <= 0) playerExplosion = null;
+            }
+
+            if (playing) GameLoop();
+            else LoseScreen();
+        }
+        
+        //displays 'game over' and highscore
+        //resets game when key pressed
+        void LoseScreen() {
+            //detete all game objects
+            player = null;
+            ball = null;
+            enemies = new Enemy[100];
+            explosions = new Explosion[10];
+
+            //display score and text
+            Text.Color = Color.White;
+            Text.Size = 100;
+            Text.Draw("GAME OVER", 300, 300, mainFont);
+            Text.Size = 50;
+            Text.Draw($"Score:\n{score}\nHighScore\n{highScore}", 300, 400, mainFont);
+
+            //restart game when spacebar pressed
+            if (Input.IsKeyboardKeyPressed(KeyboardKey.Space)) { 
+                playing = true;
+                spawnTimer = 3;
+                score = 0;
+                player = new Player();
+                curentSpawnRates = startSpawnRates;
+                spawnChangeTimesIndex = 0;
+                timePlaying = 0;
+            }
+        }
+
+        //all game logic and drawing
+        void GameLoop()
+        {
+            timePlaying += Time.DeltaTime;
+            //change spawn rates
+            if (spawnChangeTimesIndex < spawnChangeTimes.Length) { //stop swapping once end of list is reached
+                if (timePlaying >= spawnChangeTimes[spawnChangeTimesIndex]) {
+                    spawnChangeTimesIndex++;
+                    //swap back and forth
+                    if (curentSpawnRates != spawnRates1) curentSpawnRates = spawnRates1;
+                    else curentSpawnRates = spawnRates2;
+                }
+            }
 
             //spawn enemies
             spawnTimer -= Time.DeltaTime;
@@ -51,6 +129,11 @@ namespace MohawkGame2D
                     }
                     enemies[i] = null;
                     continue;
+                } else if (enemies[i].gameOver) { //player lost
+                    playing = false;
+                    playerExplosion = new Explosion(player.position, 0, mainFont);
+                    if (score > highScore) highScore = score;
+                    break;
                 }
             }
 
@@ -112,13 +195,13 @@ namespace MohawkGame2D
         void ResetTimer() {
             //roll a value to determine the bracket
             float roll = Random.Float();
-            if (roll > 0.8f) { //20% chance
+            if (roll > curentSpawnRates[0]) { 
                 spawnTimer = Random.Float(5, 7);
-            } else if (roll > 0.4f) { //40% chance
+            } else if (roll > curentSpawnRates[1]) { 
                 spawnTimer = Random.Float(2, 5);
-            } else if (roll > 0.15f) { //25% chance
+            } else if (roll > curentSpawnRates[2]) { 
                 spawnTimer = Random.Float(0.5f, 2);
-            } else { //15% chance
+            } else { 
                 //double spawn
                 spawnTimer = 0;
             }

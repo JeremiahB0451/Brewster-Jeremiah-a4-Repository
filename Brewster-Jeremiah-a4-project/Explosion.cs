@@ -8,10 +8,11 @@ namespace MohawkGame2D
     public class Explosion
     {
         Vector2 position;
-        public float existTime = 5;
+        public float existTime = 3;
         float colorChangeTime = 0f;
         int score;
         string drawText = "";
+        Color textColor;
         Sound explosionSound;
         Font font;
 
@@ -44,27 +45,27 @@ namespace MohawkGame2D
                 case 0:
                     //dont show score
                     Text.Size = 0;
-                    Text.Color = Color.Clear;
+                    textColor = Color.Clear;
                     drawText = "";
                     return;
                 case 100:
                 case 200:
-                    Text.Size = 15;
-                    Text.Color = Color.White;
+                    Text.Size = 20;
+                    textColor = Color.White;
                     drawText = $"{score}";
                     return;
                 case 300:
                 case 400:
                     Text.Size = 30;
-                    Text.Color = new Color(128, 240, 240);
+                    textColor = new Color(90, 180, 240);
                     drawText = $"{score}";
                     return;
                 case 500:
                     Text.Size = 50;
                     //change colour every 0.5 secconds
                     if (colorChangeTime <= 0) {
-                        Text.Color = Random.Color(new Color(0, 0, 0), new Color(255, 255, 255), true);
-                        colorChangeTime = 0.5f;
+                        textColor = Random.Color(new Color(0, 0, 0), new Color(255, 255, 255), true);
+                        colorChangeTime = 0.3f;
                     }
                     drawText = $"{score}";
                     return;
@@ -99,6 +100,10 @@ namespace MohawkGame2D
 
             //draw the text
             //drop shadow
+            Text.Color = Color.Black;
+            Text.Draw(drawText, position.X + 2, position.Y + 2);
+            Text.Color = textColor;
+            Text.Draw(drawText, position);
 
             //Draw.SetLineSize(1);
             //Draw.SetLineColor(Color.White);

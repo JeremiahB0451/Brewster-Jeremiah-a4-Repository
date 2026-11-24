@@ -128,7 +128,7 @@ namespace MohawkGame2D
             //'upgrade' ball after it hits enough walls
             if (wallsHit >= upgradeAt && !upgraded) {
                 enenmyLimit = enemyLimitUpgrade;
-                velocity *= 1.5f;
+                velocity *= 1.2f;
                 ballColor = upgradedColor;
                 targetColor = Random.Color();
                 upgraded = true;
