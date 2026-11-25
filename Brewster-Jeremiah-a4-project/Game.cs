@@ -29,6 +29,7 @@ namespace MohawkGame2D
         int highScore = 0;
         bool playing = true;
         Font mainFont;
+        Music bgMisic;
         public void Setup()
         {
             Window.SetTitle("Space Shooter Game");
@@ -45,11 +46,16 @@ namespace MohawkGame2D
 
             //asset loading
             mainFont = Text.LoadFont("Assets/OCRAEXT.TTF", 200);
+            bgMisic = Audio.LoadMusic("Assets/SpaceMusic.ogg");
+            Audio.SetVolume(bgMisic, 1.6f);
+            Audio.Play(bgMisic);
         }
 
         public void Update()
         {
             Window.ClearBackground(background);
+
+            
 
             //draw stars in both states
             for (int i = 0; i < stars.Length; i++) {
@@ -69,6 +75,9 @@ namespace MohawkGame2D
         //displays 'game over' and highscore
         //resets game when key pressed
         void LoseScreen() {
+            //stop music
+            Audio.Stop(bgMisic);
+
             //detete all game objects
             player = null;
             ball = null;
@@ -78,9 +87,13 @@ namespace MohawkGame2D
             //display score and text
             Text.Color = Color.White;
             Text.Size = 100;
-            Text.Draw("GAME OVER", 300, 300, mainFont);
+            Text.Draw("GAME OVER", 40, 200, mainFont);
             Text.Size = 50;
-            Text.Draw($"Score:\n{score}\nHighScore\n{highScore}", 300, 400, mainFont);
+            Text.Draw($"\t\t\t\tScore: {score}" +
+                $"\n" +
+                $"\n\t\tHighScore: {highScore}" +
+                $"\n" +
+                $"\n\tPress Space to\n   try again", 60, 350, mainFont);
 
             //restart game when spacebar pressed
             if (Input.IsKeyboardKeyPressed(KeyboardKey.Space)) { 
@@ -91,6 +104,7 @@ namespace MohawkGame2D
                 curentSpawnRates = startSpawnRates;
                 spawnChangeTimesIndex = 0;
                 timePlaying = 0;
+                Audio.Play(bgMisic);
             }
         }
 

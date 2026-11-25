@@ -28,6 +28,9 @@
     <None Update="Assets\OCRAEXT.TTF">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Assets\SpaceMusic.ogg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Assets\WallBounce.wav">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

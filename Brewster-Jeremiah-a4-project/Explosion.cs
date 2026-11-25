@@ -101,9 +101,9 @@ namespace MohawkGame2D
             //draw the text
             //drop shadow
             Text.Color = Color.Black;
-            Text.Draw(drawText, position.X + 2, position.Y + 2);
+            Text.Draw(drawText, position.X + 2 - Text.Size/2 - Text.Size/3, position.Y + 2 - Text.Size/ 2 + Text.Size / 4);
             Text.Color = textColor;
-            Text.Draw(drawText, position);
+            Text.Draw(drawText, position.X - Text.Size/2 - Text.Size/3, position.Y - Text.Size/ 2 + Text.Size / 4);
 
             //Draw.SetLineSize(1);
             //Draw.SetLineColor(Color.White);
